@@ -1,14 +1,9 @@
 #include "ubrb.h"
-
-//#include <stdlib.h>
-//#include <stdio.h>
 #include <string.h>
 
 //#define UBRB_DEBUG
 #ifdef UBRB_DEBUG
-    //#define debug_printf(args...) printf(args)
-	#include <DigiCDC.h>
-	#define debug_printf(args) SerialUSB.write(args);
+    #define debug_printf(args...) printf(args)
 #else
     #define debug_printf(args...) do {} while(0)
 #endif
