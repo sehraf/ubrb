@@ -1,0 +1,11 @@
+[Unit]
+Description=UART based RAM banks
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+EnvironmentFile=/etc/conf.d/ubrb.conf
+ExecStop=/usr/bin/sh -c 'ubrb ${device} S${store} `cat /root/keyfile256 | xxd -p -c 256`'
+
+[Install]
+RequiredBy=multi-user.target

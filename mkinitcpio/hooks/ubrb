@@ -1,0 +1,35 @@
+#!/usr/bin/ash
+
+run_hook ()
+{
+	source /etc/conf.d/ubrb.conf
+
+	if [ -n "${cryptdevice}" ]; then
+		echo 'using $cryptdevice'
+		cryptdev="$(echo "${cryptdevice}" | cut -d: -f1)"
+		cryptname="$(echo "${cryptdevice}" | cut -d: -f2)"
+		#cryptoptions="$(echo "${cryptdevice}" | cut -d: -f3)"
+	else
+		echo 'using /etc/conf.d/ubrb.conf'
+		cryptdev="${luksVolume}"
+		cryptname="${luksName}"
+	fi
+
+	echo "receiving ubrb"
+	/usr/bin/ubrb ${device} G${store} | /usr/bin/xxd -r -p > /keyfile
+
+	echo "unlocking ${cryptdev}"
+	cryptsetup luksOpen ${cryptdev} ${cryptname} --key-file /keyfile
+
+        # encryptssh workaround
+        echo > /.done
+}
+
+run_cleanuphook ()
+{
+	rm /keyfile
+
+	if [ -f /.done ]; then
+		rm /.done
+	fi
+}
