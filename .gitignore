@@ -1,2 +1,4 @@
 *.o
 UBRB_HostReceiver/ubrb
+AUR/ubrb/
+*.pkg.tar.xz
