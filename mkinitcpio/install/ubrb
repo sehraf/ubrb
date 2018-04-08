@@ -4,7 +4,7 @@ build ()
 {
         source /etc/conf.d/ubrb.conf
 
-	echo "upload your keyfile by running \"# ubrb ${device} S${store} \`cat \${keyfile} | xxd -p -s ${sizeInByte}\`\""
+	echo "upload your keyfile by running \"# ubrb ${device} S${store} \`cat \${keyfile} | xxd -p -c \${sizeInByte}\`\""
 
 	add_file "/etc/conf.d/ubrb.conf"
 	add_binary "rm"
