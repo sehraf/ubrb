@@ -3,7 +3,48 @@
 
 //#define UBRB_DEBUG
 #ifdef UBRB_DEBUG
-    #define debug_printf(args...) printf(args)
+    //#define debug_printf(args...) printf(args)
+
+	// XMC2GO
+	//#ifdef XMC1100_Q024x0064
+	#if 0
+		#warning "Enabling debugging on XMC1100"
+		#include <cstdio>
+		#include <cstdlib>
+		void doDebugPrint(struct ubrb *ubrb, char* args...) {
+			char *c;
+			size_t i;
+
+			i = sprintf(NULL, args);
+			c = (char *)malloc(i + 1);
+			sprintf(c, args);
+
+			//Serial.write(c);
+			for (size_t i = 0; i < sizeof(c); ++i)
+				ubrb->ops.writeByte(c[i]);
+
+			free(c);
+		}
+	#endif
+
+	// Digispark
+	//#elseif __AVR_ATtiny85__
+	#if 0
+		#warning "Enabling debugging on ATtiny85"
+		// very simple debugging (because of code size)
+		void inline doDebugPrint(struct ubrb *ubrb, char* args...) {
+			size_t i;
+
+			for (size_t i = 0; i < 4; ++i)
+				ubrb->ops.writeByte(args[i]);
+			ubrb->ops.writeByte('\n');
+		}
+	#endif
+
+	#if 1
+		void inline doDebugPrint(struct ubrb *ubrb, char* args...) {do {} while(0); }
+	#endif
+	#define debug_printf(args...) doDebugPrint(ubrb, args);
 #else
     #define debug_printf(args...) do {} while(0)
 #endif
@@ -26,6 +67,9 @@ void ubrb_tick(struct ubrb *ubrb) {
 		// anything to receive?
 		if (!ubrb->ops.readByte(&charReceived))
 			break;
+
+		setLED(ubrb, 1);
+		debug_printf("read %x", charReceived);
 
 		// valid char?
 		if (charReceived != 'G' && charReceived != 'S' && charReceived != 'C')
@@ -72,10 +116,7 @@ void ubrb_tick(struct ubrb *ubrb) {
 		} else
 			ubrb->state = idle;
 
-		debug_printf("switching state: ");
-		debug_printf(ubrb->state + '0');
-		debug_printf('\n');
-
+		debug_printf("switching state: %d\n", ubrb->state);
 		break;
 	case get:
 		setLED(ubrb, 1);
@@ -121,7 +162,7 @@ void ubrb_set(struct ubrb *ubrb) {
 
 	i = 0;
 	// we receive twice the size
-	while ((i >> 1) < ubrb->banks.size) {
+	while (i < ubrb->banks.size << 1) {
 		// read next character
 		if (!readTimeout(ubrb))
 			break;
@@ -131,6 +172,10 @@ void ubrb_set(struct ubrb *ubrb) {
 		// check for end
 		if (charReceived == '\n')
 			break;
+
+		// make lower case
+		if (charReceived >= 'A' && charReceived <= 'Z')
+			charReceived -= 'A' - 'a';
 
 		// valid hex?
 		if (!(	(charReceived >= '0' && charReceived <= '9') || 
@@ -150,11 +195,11 @@ void ubrb_set(struct ubrb *ubrb) {
 		if (i % 2) {
 			// wrote first nibble
 			*char_p <<= 4;
-			debug_printf("shift\n");
+			//debug_printf("shift\n");
 		} else {
 			// wrote second nibble
 			++char_p;
-			debug_printf("next\n");
+			//debug_printf("next\n");
 		}
 	}
 }
@@ -172,11 +217,16 @@ void ubrb_clear(struct ubrb *ubrb) {
 int readTimeout(struct ubrb *ubrb) {
 	counter = 0;
 	do {
+		// anything there?
 		if (ubrb->ops.readByte(&charReceived)) 
 			return 1;
-		else
-			if ((counter++) >> 2 >= timeout)
-				return 0;
+
+		// tiemout?
+		if (counter++ >= timeout)
+			return 0;
+
+		// sleep
+		ubrb->ops.delay(sleepTime);
 	} while(1);
 }
 
@@ -186,7 +236,7 @@ void inline setLED(struct ubrb *ubrb, uint8_t val) {
 }
 
 char inline bin2hex(uint8_t b) {
-	b &= 0xf;
+	b &= 0x0f;
 
 	if (b >= 10)
 		return 'a' + b - 10;

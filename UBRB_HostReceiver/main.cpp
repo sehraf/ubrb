@@ -12,9 +12,6 @@
 
 // 10MB max size
 #define maxBufferSize ((0x1 << 10*2) * 10)
-// #define storeNumber	10 // 0 to 9
-// #define storeSize	256
-// #define storeSize2	256 << 1
 
 #if debug
     #define debug_printf(args...) printf(args)
@@ -87,12 +84,12 @@ int main(int argc, char *argv[])
 		debug_printf("<- %s\n", command);
 
 		do {
-			n = serial_read(serial_fd, bufferReceive_p, (bufferReceiveSize) - (bufferReceive_p - bufferReceive), 1000 * 100);
+			n = serial_read(serial_fd, bufferReceive_p, (bufferReceiveSize) - (bufferReceive_p - bufferReceive), 1000 * 500);
 			debug_printf("-> %d\n", n);
 
 			if (n)
 				bufferReceive_p += n;
-			 else
+			else
 				break;
 
 			if (*(bufferReceive_p - 1) == '\n')
@@ -100,13 +97,13 @@ int main(int argc, char *argv[])
 
 			if (bufferReceive_p == bufferReceive + bufferReceiveSize) {
 				bufferReceiveSize <<= 1;
-				debug_printf("expanding buffer to %d\n", bufferReceiveSize);
+				debug_printf("expanding buffer to %lu\n", bufferReceiveSize);
 
 				if (bufferReceiveSize >= maxBufferSize) {
 					std::cerr << "error: buffer size exceeded" << std::endl;
 					break;
 				}
-				
+
 				bufferReceive = (uint8_t*) realloc((void *) bufferReceive, bufferReceiveSize);
 				bufferReceive_p = bufferReceive + bufferReceiveSize / 2;
 			}
@@ -184,9 +181,24 @@ int serial_open(char *serial_name, speed_t baud)
 	return fd;
 }
 
+#define chunk 8
 void serial_write(int serial_fd, char *data, int size)
 {
-	write(serial_fd, data, size);
+	// since the receiver could have only a small buffer, send data slow
+	for (int i = 0; i < size;) {
+		if (size - i >= chunk) {
+			write(serial_fd, data, chunk);
+			i += chunk,
+			data += chunk;
+		} else {
+			write(serial_fd, data, size - i);
+			return;
+		}
+
+		debug_printf("send %d\n", i);
+
+		usleep(100 * 1000);
+	}
 }
 
 int serial_read(int serial_fd, uint8_t *data, int size, int timeout_usec)
@@ -210,7 +222,8 @@ int serial_read(int serial_fd, uint8_t *data, int size, int timeout_usec)
 			n = read(serial_fd, &data[count], size - count);
 			count += n;
 		}
-		debug_printf(">> %d (%d/%d)\n", n, count, size);
+		debug_printf(">> %d (%d/%d)\t", n, count, size);
+		debug_printf(">> %s\n", data);
 	} while (count < size && ret == 1);
 
 	return count;

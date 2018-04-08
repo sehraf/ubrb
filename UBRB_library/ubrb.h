@@ -4,7 +4,8 @@
 // #include <stdio.h>
 #include <stdint.h>
 
-#define timeout 1000
+#define sleepTime 50 // ms
+#define timeout 20 // --> sleepTime * timeout = 1s
 
 enum state {
 	idle = 0,
@@ -13,6 +14,10 @@ enum state {
 	clear
 };
 
+/*
+	rng and led are optional
+	the rest must be set
+*/
 struct ubrb_rng {
 	uint8_t  (*getByte)();
 	/* uint16_t (*getWord)(); */
@@ -20,6 +25,7 @@ struct ubrb_rng {
 
 struct ubrb_leds {
 	void (*setLED)(uint8_t);
+	/* void (*setLED)(uint8_t led, uint8_t val); */
 };
 
 struct ubrb_ops {
@@ -27,6 +33,7 @@ struct ubrb_ops {
 	void (*writeByte)(uint8_t);
 	struct ubrb_rng rng;
 	struct ubrb_leds leds;
+	void (*delay)(uint16_t);
 };
 
 struct ubrb_banks {
