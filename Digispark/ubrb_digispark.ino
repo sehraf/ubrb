@@ -3,8 +3,8 @@
 
 #define LED 1 //LED on Model A
 
-#define bankNum 2
-#define bankSize 32
+#define bankNum 1
+#define bankSize 100
 
 int read(uint8_t *c) {
   if (SerialUSB.available())
@@ -23,6 +23,10 @@ void led(uint8_t v) {
   digitalWrite(LED, v ? HIGH : LOW); 
 }
 
+void doDelay(uint16_t ms) {
+  SerialUSB.delay(ms);
+}
+
 struct ubrb ubrb = {
   .ops = {
     .readByte = read,
@@ -32,14 +36,14 @@ struct ubrb ubrb = {
     },
     .leds = {
       .setLED = led
-    }
+    },
+    .delay = doDelay
   },
   .activeBank = NULL,
   .banks = {
     .num = bankNum,
     .size = bankSize,
     .bank = NULL
-
   },
   .state = idle
 };
@@ -58,7 +62,12 @@ void setup() {
     memset(ubrb.banks.bank[i], 0, bankSize);
   }
 
-  digitalWrite(1, LOW);
+  // write "Hello world!" in bank zero
+  static const char str[] = "Hello world!\0";
+  if (bankSize >= sizeof(str))
+    memcpy(ubrb.banks.bank[0], str, sizeof(str));
+
+  digitalWrite(LED, LOW);
 }
 
 void loop() {

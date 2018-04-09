@@ -24,13 +24,18 @@ void led(uint8_t v) {
   digitalWrite(LED, v ? HIGH : LOW);
 }
 
+void doDelay(uint16_t ms) {
+  delay(ms);
+}
+
 struct ubrb_leds leds = { .setLED = led };
 struct ubrb_rng rng = {0};
 struct ubrb_ops ops = {
       .readByte = receive,
       .writeByte = send,
       .rng = rng,
-      .leds = leds
+      .leds = leds,
+      .delay = doDelay
 };
 struct ubrb_banks banks =  {
       .num = bankNum,
@@ -59,6 +64,14 @@ void setup() {
     memset(ubrb.banks.bank[i], 0, bankSize);
   }
 
+  // write "Hello world!" in bank zero
+  uint8_t str[] = "Hello world!\0";
+  if (bankSize >= sizeof(str))
+    memcpy(ubrb.banks.bank[0], str, sizeof(str));
+
+  // initialisation is too fast
+  // let the LED on for a bit
+  delay(500);
   digitalWrite(LED, LOW);
 }
 
