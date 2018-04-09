@@ -214,6 +214,19 @@ void ubrb_clear(struct ubrb *ubrb) {
 		memset(ubrb->activeBank, 0, ubrb->banks.size);
 }
 
+void ubrb_checkStruct(struct ubrb *ubrb) {
+	if (/* ops */
+		ubrb->ops.readByte &&
+		ubrb->ops.writeByte &&
+		ubrb->ops.delay &&
+		/* bank */
+		ubrb->banks.bank &&
+		ubrb->banks.num &&
+		ubrb->banks.size)
+		return;
+	while(1);
+};
+
 int readTimeout(struct ubrb *ubrb) {
 	counter = 0;
 	do {

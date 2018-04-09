@@ -53,5 +53,6 @@ void ubrb_tick(struct ubrb *ubrb);
 void ubrb_get(struct ubrb *ubrb);
 void ubrb_set(struct ubrb *ubrb);
 void ubrb_clear(struct ubrb *ubrb);
+void ubrb_checkStruct(struct ubrb *ubrb);
 
 #endif
