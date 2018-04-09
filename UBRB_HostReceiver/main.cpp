@@ -10,8 +10,9 @@
 
 #define debug 0
 
-// 10MB max size
-#define maxBufferSize ((0x1 << 10*2) * 10)
+#define maxBufferSize ((0x1 << 10*2) * 10) // 10MB max size
+#define chunk 2 // super slow for Digispark SerialUSB
+#define sleepTime 100 // ms
 
 #if debug
     #define debug_printf(args...) printf(args)
@@ -181,7 +182,6 @@ int serial_open(char *serial_name, speed_t baud)
 	return fd;
 }
 
-#define chunk 8
 void serial_write(int serial_fd, char *data, int size)
 {
 	// since the receiver could have only a small buffer, send data slow
@@ -197,7 +197,7 @@ void serial_write(int serial_fd, char *data, int size)
 
 		debug_printf("send %d\n", i);
 
-		usleep(100 * 1000);
+		usleep(sleepTime * 1000);
 	}
 }
 

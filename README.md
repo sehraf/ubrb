@@ -25,10 +25,3 @@ Hello
 LUKS
 -
 The mkinitcpio folder contains hooks to unlock a root-partition and the systemd folder contains a service that sends the keyfile to the device.
-
-
-Known problems
--
-The Digispark variant doesn't work reliable. Storing a few character works (using build-in serial monitor from Arduino IDE) it doesn't work in combination with the host application.
-
-Oh and this isn't tested well right now, so ymmv.
