@@ -110,19 +110,7 @@ int main(int argc, char *argv[])
 			}
 		} while(bufferReceive_p < bufferReceive + bufferReceiveSize);
 
-// #if !b64_output
-// 		// decode base64
-// 		{
-// 			uint8_t *bufferDecode = (uint8_t*) malloc(bufferReceiveSize);
-
-// 			b64_decode(bufferReceive, (bufferReceive_p - bufferReceive), bufferDecode);
-// 			fputs((const char *)bufferDecode, stdout);
-
-// 			free(bufferDecode);
-// 		}
-// #else
 		fputs((const char *)bufferReceive, stdout);
-// #endif
 		break;
 	default:
 		std::cerr << "error: unknown command: " << command << std::endl;

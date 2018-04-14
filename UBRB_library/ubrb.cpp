@@ -6,7 +6,7 @@
     //#define debug_printf(args...) printf(args)
 
 	// XMC2GO
-	//#ifdef XMC1100_Q024x0064
+	//#ifdef XMC1100_XMC2GO
 	#if 0
 		#warning "Enabling debugging on XMC1100"
 		#include <cstdio>
@@ -50,9 +50,9 @@
 #endif
 
 uint16_t i;
-uint8_t charReceived;
-uint8_t *char_p;
 uint16_t counter;
+uint8_t *char_p;
+uint8_t charReceived;
 
 int readTimeout(struct ubrb *ubrb);
 void setLED(struct ubrb *, uint8_t v);
@@ -249,8 +249,6 @@ void inline setLED(struct ubrb *ubrb, uint8_t val) {
 }
 
 char inline bin2hex(uint8_t b) {
-	b &= 0x0f;
-
 	if (b >= 10)
 		return 'a' + b - 10;
 	else
