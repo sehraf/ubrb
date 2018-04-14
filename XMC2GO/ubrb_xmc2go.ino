@@ -1,11 +1,9 @@
 #include <ubrb.h>
 
-#define LED1 0x0e
-#define LED2 0x0f
-#define LED LED2
+#define LED LED1
 
-#define bankSize 64
-#define bankNum 10
+#define bankSize 256
+#define bankNum 5
 
 void send(uint8_t c) {
   Serial.write(c);
