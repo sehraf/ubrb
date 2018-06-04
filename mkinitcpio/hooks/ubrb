@@ -5,20 +5,20 @@ run_hook ()
 	source /etc/conf.d/ubrb.conf
 
 	if [ -n "${cryptdevice}" ]; then
-		echo 'using $cryptdevice'
+		echo "ubrb: using \$cryptdevice = ${cryptdevice}"
 		cryptdev="$(echo "${cryptdevice}" | cut -d: -f1)"
 		cryptname="$(echo "${cryptdevice}" | cut -d: -f2)"
 		#cryptoptions="$(echo "${cryptdevice}" | cut -d: -f3)"
 	else
-		echo 'using /etc/conf.d/ubrb.conf'
+		echo 'ubrb: using /etc/conf.d/ubrb.conf'
 		cryptdev="${luksVolume}"
 		cryptname="${luksName}"
 	fi
 
-	echo "receiving ubrb"
+	echo "ubrb: receiving from ${device}"
 	/usr/bin/ubrb ${device} G${store} | /usr/bin/xxd -r -p > /keyfile
 
-	echo "unlocking ${cryptdev}"
+	echo "ubrb: unlocking ${cryptdev}"
 	cryptsetup luksOpen ${cryptdev} ${cryptname} --key-file /keyfile
 
         # encryptssh workaround
